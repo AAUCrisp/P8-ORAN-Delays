@@ -1,0 +1,168 @@
+#!/bin/bash
+
+# Write this file into your "$HOME/.bashrc" file, using Nano or whatever
+#
+# Add (not commented) line 5-7 to your ".bashrc", to import this file
+#
+#           if [ -f ~/bash_aliases ]; then
+#               . ~/bash_aliases
+#           fi
+#
+# I know this is usually called ".bashaliases" instead, to hide the file... 
+# I like it better being visible... do and call it whatever you please, just remember to import the right filename in ".bashrc"
+#
+###############################
+#
+# Update the 'p8_path' right below, to your personal path.
+###################################################################
+
+
+############################################
+#  --  P8 Specific Variables & Setup
+p8_path="$HOME/P8-ORAN-Delays"
+p8_git_path="--git-dir=$p8_path/.git --work-tree=$p8_path"
+oai_path="$HOME/openairinterface"
+
+# declare -A ips=( 
+#     ["up0"]="192.168.1.105" 
+#     ['up1']="192.168.1.80"
+#     ['up2']="192.168.1.107"
+#     ['up3']="192.168.1.109"
+#     ['cal']="192.168.1.189"
+#     ['ste']="192.168.1.76"
+#     ['tho']="192.168.1.176"
+#     ['ub8']="192.168.1.182"
+# )
+
+
+
+###############################################
+#  --  General Use Variables & Aliases  --
+explorer="thunar"
+alias py="python"                       # Less keystrokes... stupid keystrokes...
+alias up="source ~/bash_aliases"        # Update aliases & BASH functions in your terminal
+
+
+
+# ------------------------------- #
+# ----  OAI Oriented Helpers  ---- #
+p8() {
+
+    current_dir=@PWD
+
+    # ----  Send Help!!  ---- #
+    if [[ $@ = help ]]          # Help argument is entered
+    then
+        echo -e "\n\e[1m\e[4mP8 Help\e[0m\nIf \e[3mp8\e[0m is called without further arguments, it will \e[3mcd\e[0m to your P8 directory.\n"
+        echo -e "Valid preset arguments are: \e[3mgit, exp, dir, sens, head, back, up<0-3>,\e[0m, and finally \e[3mgit\e[0m which has more options.\n"
+        echo -e "If and argument is inserted but not amongst these, it will expect that you're trying to run a Python script with that name from the P8 directory\n"
+        echo -e "\e[3m\e[4msens\e[0m, \e[3m\e[4mhead\e[0m, \e[3m\e[4mback\e[0m arguments will run the called programs from your P8 directory, no matter where you terminal \"sits\".\n"
+        echo -e "\e[3m\e[4mdir\e[0m argument will jump to your P8 directory in your terminal.\n"
+        echo -e "\e[3m\e[4mexp\e[0m argument will open your P8 directory in your explorer.\n"
+        echo -e "\e[3m\e[4mup<0-3>\e[0m argument will connect to inserted \"up number\" via SSH.\n"
+        echo -e "\e[3m\e[4mgit\e[0m argument, if called without further arguments, will go through all the motions of a \e[3mgit commit/push\e[0m, and ask for a message for your commit.\n"
+        echo -e "If entered with more arguments than just \e[3mgit\e[0m, it will just do your normal git commands that gets inserted."
+        echo -e "Example: \e[3mp8 git commit -m \"Deleted the entire repository\"\e[0m will make a commit with that message, as it normally would.\n"
+    
+    # ----  Git Push Macro  ---- #
+    elif [[ $1 = git ]]          # Help argument is entered
+    then
+
+        if [[ ! $# -eq "1" ]]       # If the first argument is "run"
+        then
+            set -- "${@:2}"     # Remove the "run" argument
+
+            if [[ $1 = "help" ]]       # If the first argument is "run"
+            then
+                echo -e "\n\e[1m\e[4mP8 Git Help\e[0m\nIf \e[3mp8 git\e[0m is called without further arguments, it will go through all the motions of a \e[3mgit commit/push\e[0m, and ask for a message for your commit.\n"
+                echo -e "If entered with more arguments than just \e[3mgit\e[0m, it will just do your normal git commands that gets inserted."
+                echo -e "Example: \e[3mp8 git commit -m \"Deleted the entire repository\"\e[0m will make a commit with that message, as it normally would.\n"
+            else
+                # echo "I'm in! Git Argument is: $@"
+                git $p8_git_path $@
+            fi;
+        
+        else
+            echo "Doing full Git Commit motion for P8"
+            git $p8_git_path pull
+            git $p8_git_path add .
+            echo -e "\n \e[4m\e[1mWrite \e[3mcommit\e[23m message, please:\e[0m"
+            read msg
+            echo -e "\n"
+            git $p8_git_path commit -m "$msg"
+            git $p8_git_path push
+
+        fi;
+
+
+    # # ----  Show the P8 directory in the Thunar explorer  ---- #
+    # elif [[ $@ = exp ]]         # Directory argument is entered
+    # then
+    #     echo -e "Opening P8 Directory in \e[3m$explorer\e[0m"
+    #     $explorer $p8_path             # Enter P5 directory in your explorer
+    
+    elif [[ $@ = dir ]]         # Directory argument is entered
+    then
+        echo "Entering P8 Directory"
+        cd $p8_path            # Enter P5 directory in terminal
+
+    elif [[ $1 = back ]]         # Run P8 Server Program
+    then
+        # if [[ ! $# -eq "1" ]]       # If the first argument is "run"
+        # then
+            set -- "${@:2}"     # Remove the "run" argument
+        # fi;
+
+        # current_dir=@PWD
+
+        echo "Running the Backend"
+
+        cd $p8_path/doc_setup
+        sudo docker-compose up -d mysql oai-amf oai-smf oai-upf oai-ext-dn $@
+        sudo docker-compose ps -a
+        cd $current_dir
+
+
+    elif [[ $1 = log ]]         # Run P8 Server Program
+    then
+
+        echo "Opening Docker Logging"
+
+        cd $p8_path/doc_setup
+        sudo docker logs rfsim5g-oai-amf --follow
+        cd $current_dir
+
+
+    elif [[ $1 = ue ]]         # Run P8 Server Program
+    then
+
+        echo "Setting up a UE"
+
+        cd $p8_path/doc_setup
+        sudo docker-compose up -d oai-nr-ue
+        cd $current_dir
+
+
+    elif [[ $1 = gnb ]]         # Run P8 Headend Program
+    then
+        echo "Setting up the gNB"
+        $oai_path/cmake_targets/ran_build/build/nr-softmodem –O /home/test/gnb.conf --sa –E –-rfsim
+
+    # elif [[ $1 = up* ]]         # Connect to the UP0 via SSH
+    # then
+    #     echo -e "Connect to the $1 via SSH"
+    #     ipCon=${ips[$1]}
+    #     # ipCon=${ips[$@]}
+    #     # ipCon=${ips[$1]}
+    #     echo -e "IP Array return is $ipCon"
+    #     ssh $1@$ipCon
+
+    else
+    # elif [[ $@ = dir ]]         # Directory argument is entered
+    # then
+        echo "Entering P8 Directory"
+        cd $p8_path            # Enter P5 directory in terminal
+
+    fi;
+}
+
