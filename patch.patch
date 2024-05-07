@@ -1,0 +1,612 @@
+diff --git a/openair2/LAYER2/NR_MAC_UE/nr_ue_scheduler.c b/openair2/LAYER2/NR_MAC_UE/nr_ue_scheduler.c
+index f6540b62cb..d135225c1e 100644
+--- a/openair2/LAYER2/NR_MAC_UE/nr_ue_scheduler.c
++++ b/openair2/LAYER2/NR_MAC_UE/nr_ue_scheduler.c
+@@ -3003,8 +3003,6 @@ static bool fill_mac_sdu(NR_UE_MAC_INST_t *mac,
+                          bool *lcids_data_status,
+                          uint8_t *num_lcids_same_priority)
+ {
+-  LOG_A(NR_MAC,"%s,start,%ld \n", __func__ ,clock() / (CLOCKS_PER_SEC / 1000000));
+-
+   NR_UE_SCHEDULING_INFO *sched_info = &mac->scheduling_info;
+   const uint8_t sh_size = sizeof(NR_MAC_SUBHEADER_LONG);
+ 
+@@ -3128,8 +3126,6 @@ static bool fill_mac_sdu(NR_UE_MAC_INST_t *mac,
+     (*num_lcids_same_priority)--;
+     return 0;
+   }
+-  LOG_A(NR_MAC,"%s,end,%ld \n", __func__ ,clock() / (CLOCKS_PER_SEC / 1000000));
+-
+   return 1;
+ }
+ 
+diff --git a/openair2/LAYER2/NR_MAC_gNB/gNB_scheduler_dlsch.c b/openair2/LAYER2/NR_MAC_gNB/gNB_scheduler_dlsch.c
+index caf559e312..54a5bd4b6a 100644
+--- a/openair2/LAYER2/NR_MAC_gNB/gNB_scheduler_dlsch.c
++++ b/openair2/LAYER2/NR_MAC_gNB/gNB_scheduler_dlsch.c
+@@ -80,7 +80,6 @@ int nr_write_ce_dlsch_pdu(module_id_t module_idP,
+                           unsigned char drx_cmd,
+                           unsigned char *ue_cont_res_id)
+ {
+-
+   gNB_MAC_INST *gNB = RC.nrmac[module_idP];
+   /* already mutex protected: called below and in _RA.c */
+   NR_SCHED_ENSURE_LOCKED(&gNB->sched_lock);
+diff --git a/openair2/LAYER2/NR_MAC_gNB/mac_rrc_dl_handler.c b/openair2/LAYER2/NR_MAC_gNB/mac_rrc_dl_handler.c
+index e0691cf864..13aa2a3546 100644
+--- a/openair2/LAYER2/NR_MAC_gNB/mac_rrc_dl_handler.c
++++ b/openair2/LAYER2/NR_MAC_gNB/mac_rrc_dl_handler.c
+@@ -566,8 +566,6 @@ void ue_context_release_command(const f1ap_ue_context_release_cmd_t *cmd)
+ 
+ void dl_rrc_message_transfer(const f1ap_dl_rrc_message_t *dl_rrc)
+ {
+-  LOG_A(NR_MAC, "%s,start,%ld \n", __func__ , clock()/(CLOCKS_PER_SEC / 1000000));
+-
+   LOG_D(NR_MAC,
+         "DL RRC Message Transfer with %d bytes for RNTI %04x SRB %d\n",
+         dl_rrc->rrc_container_length,
+@@ -633,6 +631,4 @@ void dl_rrc_message_transfer(const f1ap_dl_rrc_message_t *dl_rrc)
+ 
+   /* the DU ue id is the RNTI */
+   nr_rlc_srb_recv_sdu(dl_rrc->gNB_DU_ue_id, dl_rrc->srb_id, dl_rrc->rrc_container, dl_rrc->rrc_container_length);
+-  LOG_A(SDAP, "%s,start,%ld \n", __func__ , clock()/(CLOCKS_PER_SEC / 1000000));
+-
+ }
+diff --git a/openair2/LAYER2/PDCP_v10.1.0/pdcp.c b/openair2/LAYER2/PDCP_v10.1.0/pdcp.c
+index 3a0c4f47ae..99081a5ffc 100644
+--- a/openair2/LAYER2/PDCP_v10.1.0/pdcp.c
++++ b/openair2/LAYER2/PDCP_v10.1.0/pdcp.c
+@@ -1178,7 +1178,6 @@ pdcp_run (
+ )
+ //-----------------------------------------------------------------------------
+ {
+-  LOG_A(PDCP, "PDCP_run START: %ld \n", clock()/(CLOCK_PER_SEC / 1000000))
+   if (ctxt_pP->enb_flag) {
+     start_meas(&eNB_pdcp_stats[ctxt_pP->module_id].pdcp_run);
+   } else {
+@@ -1293,7 +1292,6 @@ pdcp_run (
+   }
+ 
+   VCD_SIGNAL_DUMPER_DUMP_FUNCTION_BY_NAME(VCD_SIGNAL_DUMPER_FUNCTIONS_PDCP_RUN, VCD_FUNCTION_OUT);
+-  LOG_A(PDCP, "PDCP_run end: %ld \n", clock()/(CLOCK_PER_SEC / 1000000))
+ }
+ 
+ //-----------------------------------------------------------------------------
+diff --git a/openair2/LAYER2/nr_pdcp/nr_pdcp_oai_api.c b/openair2/LAYER2/nr_pdcp/nr_pdcp_oai_api.c
+index 0b431edaa2..73e015976d 100644
+--- a/openair2/LAYER2/nr_pdcp/nr_pdcp_oai_api.c
++++ b/openair2/LAYER2/nr_pdcp/nr_pdcp_oai_api.c
+@@ -43,7 +43,6 @@
+ #include "gnb_config.h"
+ #include "executables/softmodem-common.h"
+ #include "cuup_cucp_if.h"
+-#include <time.h>
+ 
+ #define TODO do { \
+     printf("%s:%d:%s: todo\n", __FILE__, __LINE__, __FUNCTION__); \
+@@ -140,7 +139,6 @@ static void *rlc_data_req_thread(void *_)
+     i = q.start;
+     if (pthread_mutex_unlock(&q.m) != 0) abort();
+ 
+-    LOG_A(RLC,",%s,start,%ld \n", __func__, clock() / (CLOCKS_PER_SEC / 1000000));
+     rlc_data_req(&q.q[i].ctxt_pP,
+                  q.q[i].srb_flagP,
+                  q.q[i].MBMS_flagP,
+@@ -151,8 +149,6 @@ static void *rlc_data_req_thread(void *_)
+                  q.q[i].sdu_pP,
+                  NULL,
+                  NULL);
+-    LOG_A(RLC,",%s,end,%ld \n", __func__ ,clock() / (CLOCKS_PER_SEC / 1000000));
+-
+ 
+     if (pthread_mutex_lock(&q.m) != 0) abort();
+ 
+@@ -188,7 +184,6 @@ static void enqueue_rlc_data_req(const protocol_ctxt_t *const ctxt_pP,
+ {
+   int i;
+   int logged = 0;
+-  LOG_A(PDCP, "%s,start,%ld \n", __func__ , clock()/(CLOCKS_PER_SEC / 1000000));
+ 
+   if (pthread_mutex_lock(&q.m) != 0) abort();
+   while (q.length == RLC_DATA_REQ_QUEUE_SIZE) {
+@@ -213,9 +208,6 @@ static void enqueue_rlc_data_req(const protocol_ctxt_t *const ctxt_pP,
+ 
+   if (pthread_cond_signal(&q.c) != 0) abort();
+   if (pthread_mutex_unlock(&q.m) != 0) abort();
+-
+-  LOG_A(PDCP, "%s,end,%ld \n", __func__ , clock()/(CLOCKS_PER_SEC / 1000000));
+-
+ }
+ 
+ void du_rlc_data_req(const protocol_ctxt_t *const ctxt_pP,
+@@ -227,8 +219,6 @@ void du_rlc_data_req(const protocol_ctxt_t *const ctxt_pP,
+                      sdu_size_t sdu_sizeP,
+                      uint8_t *sdu_pP)
+ {
+-  LOG_A(PDCP, "%s,start,%ld \n", __func__ , clock()/(CLOCKS_PER_SEC / 1000000));
+-
+   enqueue_rlc_data_req(ctxt_pP,
+                        srb_flagP,
+                        MBMS_flagP,
+@@ -236,7 +226,6 @@ void du_rlc_data_req(const protocol_ctxt_t *const ctxt_pP,
+                        confirmP,
+                        sdu_sizeP,
+                        sdu_pP);
+-  LOG_A(PDCP, "%s,end,%ld \n", __func__ , clock()/(CLOCKS_PER_SEC / 1000000));
+ }
+ 
+ /****************************************************************************/
+@@ -275,8 +264,6 @@ static void do_pdcp_data_ind(const protocol_ctxt_t *const ctxt_pP,
+                              const sdu_size_t sdu_buffer_size,
+                              uint8_t *const sdu_buffer)
+ {
+-  LOG_A(PDCP, "%s,start,%ld \n", __func__ , clock()/(CLOCKS_PER_SEC / 1000000));
+-
+   nr_pdcp_ue_t *ue;
+   nr_pdcp_entity_t *rb;
+   ue_id_t UEid = ctxt_pP->rntiMaybeUEid;
+@@ -306,9 +293,6 @@ static void do_pdcp_data_ind(const protocol_ctxt_t *const ctxt_pP,
+   nr_pdcp_manager_unlock(nr_pdcp_ue_manager);
+ 
+   free(sdu_buffer);
+-
+-  LOG_A(PDCP, "%s,end,%ld \n", __func__ , clock()/(CLOCKS_PER_SEC / 1000000));
+-
+ }
+ 
+ static void *pdcp_data_ind_thread(void *_)
+@@ -360,8 +344,6 @@ static void enqueue_pdcp_data_ind(const protocol_ctxt_t *const ctxt_pP,
+                                   const sdu_size_t sdu_buffer_size,
+                                   uint8_t *const sdu_buffer)
+ {
+-  LOG_A(PDCP, "%s,start,%ld \n", __func__ , clock()/(CLOCKS_PER_SEC / 1000000));
+-
+   int i;
+   int logged = 0;
+ 
+@@ -386,8 +368,6 @@ static void enqueue_pdcp_data_ind(const protocol_ctxt_t *const ctxt_pP,
+ 
+   if (pthread_cond_signal(&pq.c) != 0) abort();
+   if (pthread_mutex_unlock(&pq.m) != 0) abort();
+-  LOG_A(PDCP, "%s,end,%ld \n", __func__ , clock()/(CLOCKS_PER_SEC / 1000000));
+-
+ }
+ 
+ bool pdcp_data_ind(const protocol_ctxt_t *const ctxt_pP,
+@@ -399,18 +379,12 @@ bool pdcp_data_ind(const protocol_ctxt_t *const ctxt_pP,
+                    const uint32_t *const srcID,
+                    const uint32_t *const dstID)
+ {
+-    LOG_A(PDCP, "%s,start,%ld \n", __func__ , clock()/(CLOCKS_PER_SEC / 1000000));
+-
+   enqueue_pdcp_data_ind(ctxt_pP,
+                         srb_flagP,
+                         MBMS_flagP,
+                         rb_id,
+                         sdu_buffer_size,
+                         sdu_buffer);
+-
+-
+-  LOG_A(PDCP, "%s,end,%ld \n", __func__ , clock()/(CLOCKS_PER_SEC / 1000000));
+-
+   return true;
+ }
+ 
+@@ -686,8 +660,6 @@ uint64_t nr_pdcp_module_init(uint64_t _pdcp_optmask, int id)
+ static void deliver_sdu_drb(void *_ue, nr_pdcp_entity_t *entity,
+                             char *buf, int size)
+ {
+-  LOG_A(PDCP, "%s,start,%ld \n", __func__ , clock()/(CLOCKS_PER_SEC / 1000000));
+-
+   nr_pdcp_ue_t *ue = _ue;
+   int rb_id;
+   int i;
+@@ -721,15 +693,11 @@ static void deliver_sdu_drb(void *_ue, nr_pdcp_entity_t *entity,
+                     size);
+     }
+   }
+-
+-  LOG_A(PDCP, "%s,start,%ld \n", __func__ , clock()/(CLOCKS_PER_SEC / 1000000));
+ }
+ 
+ static void deliver_pdu_drb_ue(void *deliver_pdu_data, ue_id_t ue_id, int rb_id,
+                                char *buf, int size, int sdu_id)
+ {
+-  LOG_A(PDCP, "%s,start,%ld \n", __func__ , clock()/(CLOCKS_PER_SEC / 1000000));
+-
+   DevAssert(deliver_pdu_data == NULL);
+   protocol_ctxt_t ctxt = { .enb_flag = 0, .rntiMaybeUEid = ue_id };
+ 
+@@ -737,15 +705,11 @@ static void deliver_pdu_drb_ue(void *deliver_pdu_data, ue_id_t ue_id, int rb_id,
+   memcpy(memblock, buf, size);
+   LOG_D(PDCP, "%s(): (drb %d) calling rlc_data_req size %d UE %ld/%04lx\n", __func__, rb_id, size, ctxt.rntiMaybeUEid, ctxt.rntiMaybeUEid);
+   enqueue_rlc_data_req(&ctxt, 0, MBMS_FLAG_NO, rb_id, sdu_id, 0, size, memblock);
+-  LOG_A(PDCP, "%s,end,%ld \n", __func__ , clock()/(CLOCKS_PER_SEC / 1000000));
+-
+ }
+ 
+ static void deliver_pdu_drb_gnb(void *deliver_pdu_data, ue_id_t ue_id, int rb_id,
+                                 char *buf, int size, int sdu_id)
+ {
+-  LOG_A(PDCP, "%s,start,%ld \n", __func__ , clock()/(CLOCKS_PER_SEC / 1000000));
+-
+   DevAssert(deliver_pdu_data == NULL);
+   f1_ue_data_t ue_data = cu_get_f1_ue_data(ue_id);
+   protocol_ctxt_t ctxt = { .enb_flag = 1, .rntiMaybeUEid = ue_data.secondary_ue };
+@@ -774,8 +738,6 @@ static void deliver_pdu_drb_gnb(void *deliver_pdu_data, ue_id_t ue_id, int rb_id
+     LOG_D(PDCP, "%s(): (drb %d) calling rlc_data_req size %d\n", __func__, rb_id, size);
+     enqueue_rlc_data_req(&ctxt, 0, MBMS_FLAG_NO, rb_id, sdu_id, 0, size, memblock);
+   }
+-  LOG_A(PDCP, "%s,end,%ld \n", __func__ , clock()/(CLOCKS_PER_SEC / 1000000));
+-
+ }
+ 
+ static void deliver_sdu_srb(void *_ue, nr_pdcp_entity_t *entity,
+@@ -878,8 +840,6 @@ void add_drb(int is_gnb,
+              unsigned char *ciphering_key,
+              unsigned char *integrity_key)
+ {
+-  LOG_A(PDCP, "%s,start,%ld \n", __func__ , clock()/(CLOCKS_PER_SEC / 1000000));
+-
+   nr_pdcp_entity_t *pdcp_drb;
+   nr_pdcp_ue_t *ue;
+ 
+@@ -970,9 +930,6 @@ void add_drb(int is_gnb,
+     new_nr_sdap_entity(is_gnb, has_sdap_rx, has_sdap_tx, UEid, pdusession_id, is_sdap_DefaultDRB, drb_id, mappedQFIs2Add, mappedQFIs2AddCount);
+   }
+   nr_pdcp_manager_unlock(nr_pdcp_ue_manager);
+-
+-  LOG_A(PDCP, "%s,end,%ld \n", __func__ , clock()/(CLOCKS_PER_SEC / 1000000));
+-
+ }
+ 
+ void nr_pdcp_add_srbs(eNB_flag_t enb_flag,
+@@ -1273,9 +1230,8 @@ bool nr_pdcp_data_req_drb(protocol_ctxt_t *ctxt_pP,
+                           const uint32_t *const destinationL2Id)
+ {
+   DevAssert(srb_flagP == SRB_FLAG_NO);
+-  
+-  LOG_A(PDCP, "%s,start,%ld \n", __func__ , clock()/(CLOCKS_PER_SEC / 1000000));
+-  LOG_D(PDCP, "%s() called, size %d\n hello hello", __func__, sdu_buffer_size);
++
++  LOG_D(PDCP, "%s() called, size %d\n", __func__, sdu_buffer_size);
+   nr_pdcp_ue_t *ue;
+   nr_pdcp_entity_t *rb;
+   ue_id_t ue_id = ctxt_pP->rntiMaybeUEid;
+@@ -1309,7 +1265,7 @@ bool nr_pdcp_data_req_drb(protocol_ctxt_t *ctxt_pP,
+   nr_pdcp_manager_unlock(nr_pdcp_ue_manager);
+ 
+   deliver_pdu_cb(NULL, ue_id, rb_id, pdu_buf, pdu_size, muiP);
+-  LOG_A(PDCP, "%s,end,%ld \n", __func__ , clock()/(CLOCKS_PER_SEC / 1000000));
++
+   return 1;
+ }
+ 
+@@ -1323,9 +1279,6 @@ bool cu_f1u_data_req(protocol_ctxt_t  *ctxt_pP,
+                      const pdcp_transmission_mode_t mode,
+                      const uint32_t *const sourceL2Id,
+                      const uint32_t *const destinationL2Id) {
+-
+-   LOG_A(PDCP, "%s,start,%ld \n", __func__ , clock()/(CLOCKS_PER_SEC / 1000000));
+-  
+   //Force instance id to 0, OAI incoherent instance management
+   ctxt_pP->instance=0;
+   uint8_t *memblock = malloc16(sdu_buffer_size);
+@@ -1339,8 +1292,6 @@ bool cu_f1u_data_req(protocol_ctxt_t  *ctxt_pP,
+     LOG_E(RLC, "%s:%d:%s: ERROR: pdcp_data_ind failed\n", __FILE__, __LINE__, __FUNCTION__);
+     /* what to do in case of failure? for the moment: nothing */
+   }
+-  LOG_A(PDCP, "%s,start,%ld \n", __func__ , clock()/(CLOCKS_PER_SEC / 1000000));
+-
+   return ret;
+ }
+ 
+diff --git a/openair2/LAYER2/nr_rlc/nr_rlc_entity_am.c b/openair2/LAYER2/nr_rlc/nr_rlc_entity_am.c
+index 5b488f1bfb..91985393cb 100644
+--- a/openair2/LAYER2/nr_rlc/nr_rlc_entity_am.c
++++ b/openair2/LAYER2/nr_rlc/nr_rlc_entity_am.c
+@@ -28,7 +28,6 @@
+ 
+ #include "LOG/log.h"
+ #include "common/utils/time_stat.h"
+-#include <time.h>
+ 
+ /* for a given SDU/SDU segment, computes the corresponding PDU header size */
+ static int compute_pdu_header_size(nr_rlc_entity_am_t *entity,
+@@ -932,7 +931,6 @@ static int serialize_sdu(nr_rlc_entity_am_t *entity,
+                          nr_rlc_sdu_segment_t *sdu, char *buffer, int bufsize,
+                          int p)
+ {
+- LOG_A(RLC, "%s,start,%ld \n", __func__ , clock()/(CLOCKS_PER_SEC / 1000000));
+   nr_rlc_pdu_encoder_t encoder;
+ 
+   /* generate header */
+@@ -959,7 +957,6 @@ static int serialize_sdu(nr_rlc_entity_am_t *entity,
+   if (p)
+     include_poll(entity, buffer);
+ 
+- LOG_A(RLC, "%s,end,%ld \n", __func__ , clock()/(CLOCKS_PER_SEC / 1000000));
+   return encoder.byte + sdu->size;
+ }
+ 
+@@ -1614,19 +1611,12 @@ static int generate_tx_pdu(nr_rlc_entity_am_t *entity, char *buffer, int size)
+   int pdu_size;
+   int p;
+ 
+- if (entity->tx_list == NULL) {
+-    //LOG_A(RLC, "something: \n");
++  /* sn out of window (that is: we have window stalling)? do nothing */
++  if (is_window_stalling(entity))
+     return 0;
+-  } else {
+-     LOG_A(RLC, "%s,start,%ld \n", __func__ , clock()/(CLOCKS_PER_SEC / 1000000));
+-  }
+ 
+-
+-  /* sn out of window (that is: we have window stalling)? do nothing */
+-  if (is_window_stalling(entity)) {
+-    LOG_A(RLC, "sn out of window: \n");
++  if (entity->tx_list == NULL)
+     return 0;
+-  }
+ 
+   sdu = entity->tx_list;
+ 
+@@ -1711,7 +1701,6 @@ static int generate_tx_pdu(nr_rlc_entity_am_t *entity, char *buffer, int size)
+     time_average_add(entity->common.txsdu_avg_time_to_tx, time_now, waited_time);
+   }
+ 
+- LOG_A(RLC, "%s,end,%ld \n", __func__ , clock()/(CLOCKS_PER_SEC / 1000000));
+   return ret_size;
+ //  return serialize_sdu(entity, sdu, buffer, size, p);
+ }
+@@ -1739,12 +1728,6 @@ int nr_rlc_entity_am_generate_pdu(nr_rlc_entity_t *_entity,
+   nr_rlc_entity_am_t *entity = (nr_rlc_entity_am_t *)_entity;
+   int ret;
+ 
+-   if (entity->tx_list == NULL) {
+-    return 0;
+-  } else {
+-     LOG_A(RLC, "%s,start,%ld \n", __func__ , clock()/(CLOCKS_PER_SEC / 1000000));
+-  }
+-
+   if (status_to_report(entity)) {
+     ret = generate_status(entity, buffer, size);
+     if (ret != 0)
+@@ -1756,7 +1739,7 @@ int nr_rlc_entity_am_generate_pdu(nr_rlc_entity_t *_entity,
+     if (ret != 0)
+       return ret;
+   }
+- LOG_A(RLC, "%s,end,%ld \n", __func__ , clock()/(CLOCKS_PER_SEC / 1000000));
++
+   return generate_tx_pdu(entity, buffer, size);
+ }
+ 
+@@ -1768,7 +1751,6 @@ void nr_rlc_entity_am_recv_sdu(nr_rlc_entity_t *_entity,
+                                char *buffer, int size,
+                                int sdu_id)
+ {
+- LOG_A(RLC, "%s,start,%ld \n", __func__ , clock()/(CLOCKS_PER_SEC / 1000000));
+   nr_rlc_entity_am_t *entity = (nr_rlc_entity_am_t *)_entity;
+   nr_rlc_sdu_segment_t *sdu;
+ 
+@@ -1811,7 +1793,6 @@ void nr_rlc_entity_am_recv_sdu(nr_rlc_entity_t *_entity,
+ 
+   if (entity->common.avg_time_is_on)
+     sdu->sdu->time_of_arrival = time_average_now();
+- LOG_A(RLC, "%s,end,%ld \n", __func__ , clock()/(CLOCKS_PER_SEC / 1000000));
+ }
+ 
+ /*************************************************************************/
+diff --git a/openair2/LAYER2/nr_rlc/nr_rlc_oai_api.c b/openair2/LAYER2/nr_rlc/nr_rlc_oai_api.c
+index 5ce691ad3a..f678b2a0ca 100644
+--- a/openair2/LAYER2/nr_rlc/nr_rlc_oai_api.c
++++ b/openair2/LAYER2/nr_rlc/nr_rlc_oai_api.c
+@@ -44,7 +44,6 @@
+ extern RAN_CONTEXT_t RC;
+ 
+ #include <stdint.h>
+-#include <time.h>
+ 
+ #include <executables/softmodem-common.h>
+ 
+@@ -57,8 +56,6 @@ static int      nr_rlc_current_time_last_subframe;
+ 
+ static void release_rlc_entity_from_lcid(nr_rlc_ue_t *ue, logical_chan_id_t channel_id)
+ {
+-     
+-
+   AssertFatal(channel_id != 0, "LCID = 0 shouldn't be handled here\n");
+   nr_rlc_rb_t *rb = &ue->lcid2rb[channel_id - 1];
+   if (rb->type == NR_RLC_NONE)
+@@ -105,7 +102,6 @@ static nr_rlc_entity_t *get_rlc_entity_from_lcid(nr_rlc_ue_t *ue, logical_chan_i
+ 
+ void nr_rlc_release_entity(int rnti, logical_chan_id_t channel_id)
+ {
+-     
+   nr_rlc_manager_lock(nr_rlc_ue_manager);
+   nr_rlc_ue_t *ue = nr_rlc_manager_get_ue(nr_rlc_ue_manager, rnti);
+   if (channel_id == 0) {
+@@ -133,14 +129,11 @@ void mac_rlc_data_ind(const module_id_t  module_idP,
+                       num_tb_t num_tbP,
+                       crc_t *crcs_pP)
+ {
+-   
+-  //LOG_A(RLC, "%s() start %ld \n", __func__, clock() / (CLOCKS_PER_SEC / 1000000));
+   if (module_idP != 0 || eNB_index != 0 || /*enb_flagP != 1 ||*/ MBMS_flagP != 0) {
+     LOG_E(RLC, "%s:%d:%s: fatal\n", __FILE__, __LINE__, __FUNCTION__);
+     exit(1);
+   }
+ 
+-
+   if (enb_flagP)
+     T(T_ENB_RLC_MAC_UL, T_INT(module_idP), T_INT(rntiP),
+       T_INT(channel_idP), T_INT(tb_sizeP));
+@@ -164,7 +157,6 @@ void mac_rlc_data_ind(const module_id_t  module_idP,
+   }
+ 
+   nr_rlc_manager_unlock(nr_rlc_ue_manager);
+-  //LOG_A(RLC, "%s() end %ld \n", __func__, clock() / (CLOCKS_PER_SEC / 1000000));
+ }
+ 
+ tbs_size_t mac_rlc_data_req(const module_id_t  module_idP,
+@@ -179,7 +171,6 @@ tbs_size_t mac_rlc_data_req(const module_id_t  module_idP,
+                             const uint32_t sourceL2Id,
+                             const uint32_t destinationL2Id)
+ {
+-  //LOG_A(MAC, "%s,start,%ld \n", __func__ , clock()/(CLOCKS_PER_SEC / 1000000));
+   int ret;
+   int maxsize;
+ 
+@@ -203,11 +194,9 @@ tbs_size_t mac_rlc_data_req(const module_id_t  module_idP,
+     T(T_ENB_RLC_MAC_DL, T_INT(module_idP), T_INT(rntiP),
+       T_INT(channel_idP), T_INT(ret));
+ 
+-  //LOG_A(MAC, "%s,end,%ld \n", __func__ , clock()/(CLOCKS_PER_SEC / 1000000));
+   return ret;
+ }
+ 
+-
+ mac_rlc_status_resp_t mac_rlc_status_ind(const module_id_t module_idP,
+                                          const rnti_t rntiP,
+                                          const eNB_index_t eNB_index,
+@@ -219,9 +208,7 @@ mac_rlc_status_resp_t mac_rlc_status_ind(const module_id_t module_idP,
+                                          const uint32_t sourceL2Id,
+                                          const uint32_t destinationL2Id)
+ {
+-  // LOG_A(RLC, "%s start: %ld", __func__, clock()/(CLOCKS_PER_SEC/1000000));
+   mac_rlc_status_resp_t ret;
+-   ;
+ 
+   nr_rlc_manager_lock(nr_rlc_ue_manager);
+   nr_rlc_ue_t *ue = nr_rlc_manager_get_ue(nr_rlc_ue_manager, rntiP);
+@@ -252,7 +239,6 @@ mac_rlc_status_resp_t mac_rlc_status_ind(const module_id_t module_idP,
+   ret.head_sdu_creation_time = 0;
+   ret.head_sdu_remaining_size_to_send = 0;
+   ret.head_sdu_is_segmented = 0;
+-  //LOG_A(RLC, "%s stop: %ld", __func__, clock()/(CLOCKS_PER_SEC/1000000));
+   return ret;
+ }
+ 
+@@ -318,11 +304,9 @@ rlc_op_status_t rlc_data_req(const protocol_ctxt_t *const ctxt_pP,
+                              const uint32_t *const sourceL2Id,
+                              const uint32_t *const destinationL2Id)
+ {
+-  LOG_A(RLC,"%s,start,%ld \n", __func__, clock() / (CLOCKS_PER_SEC / 1000000));
+   int rnti = ctxt_pP->rntiMaybeUEid;
+   nr_rlc_ue_t *ue;
+   nr_rlc_entity_t *rb;
+-   ;
+ 
+   LOG_D(RLC, "rnti %d srb_flag %d rb_id %ld mui %d confirm %d sdu_size %d MBMS_flag %d\n",
+         rnti, srb_flagP, rb_idP, muiP, confirmP, sdu_sizeP, MBMS_flagP);
+@@ -353,7 +337,7 @@ rlc_op_status_t rlc_data_req(const protocol_ctxt_t *const ctxt_pP,
+   nr_rlc_manager_unlock(nr_rlc_ue_manager);
+ 
+   free(sdu_pP);
+-  LOG_A(RLC,"%s,end,%ld \n", __func__, clock() / (CLOCKS_PER_SEC / 1000000));
++
+   return RLC_OP_STATUS_OK;
+ }
+ 
+@@ -361,7 +345,6 @@ int nr_rlc_get_available_tx_space(const rnti_t rntiP,
+                                   const logical_chan_id_t channel_idP)
+ {
+   int ret;
+-   ;
+ 
+   nr_rlc_manager_lock(nr_rlc_ue_manager);
+   nr_rlc_ue_t *ue = nr_rlc_manager_get_ue(nr_rlc_ue_manager, rntiP);
+@@ -538,7 +521,6 @@ static void successful_delivery(void *_ue, nr_rlc_entity_t *entity, int sdu_id)
+   MessageDef *msg;
+ #endif
+   int is_enb;
+-   
+ 
+   /* is it SRB? */
+   for (i = 0; i < 2; i++) {
+diff --git a/openair2/LAYER2/rlc_v2/rlc_oai_api.c b/openair2/LAYER2/rlc_v2/rlc_oai_api.c
+index 8ccd416945..d9798f6138 100644
+--- a/openair2/LAYER2/rlc_v2/rlc_oai_api.c
++++ b/openair2/LAYER2/rlc_v2/rlc_oai_api.c
+@@ -119,7 +119,6 @@ tbs_size_t mac_rlc_data_req(
+   const uint32_t destinationL2Id
+    )
+ {
+-   
+   int ret;
+   rlc_ue_t *ue;
+   rlc_entity_t *rb;
+@@ -277,7 +276,6 @@ rlc_op_status_t rlc_data_req(const protocol_ctxt_t *const ctxt_pP,
+                              const uint32_t *const sourceL2Id,
+                              const uint32_t *const destinationL2Id)
+ {
+-  LOG_A(RLC,",%s,start,%ld \n", __func__, clock() / (CLOCKS_PER_SEC / 1000000));
+   int rnti = ctxt_pP->rntiMaybeUEid;
+   rlc_ue_t *ue;
+   rlc_entity_t *rb;
+@@ -321,7 +319,7 @@ rlc_op_status_t rlc_data_req(const protocol_ctxt_t *const ctxt_pP,
+   rlc_manager_unlock(rlc_ue_manager);
+ 
+   free(sdu_pP);
+-  LOG_A(RLC,",%s,end,%ld \n", __func__, clock() / (CLOCKS_PER_SEC / 1000000));
++
+   return RLC_OP_STATUS_OK;
+ }
+ 
+diff --git a/openair2/SDAP/nr_sdap/nr_sdap.c b/openair2/SDAP/nr_sdap/nr_sdap.c
+index d140789b90..783ca5a914 100644
+--- a/openair2/SDAP/nr_sdap/nr_sdap.c
++++ b/openair2/SDAP/nr_sdap/nr_sdap.c
+@@ -38,8 +38,6 @@ bool sdap_data_req(protocol_ctxt_t *ctxt_p,
+                    const uint8_t qfi,
+                    const bool rqi,
+                    const int pdusession_id) {
+-  LOG_A(SDAP, "%s,start,%ld \n", __func__ , clock()/(CLOCKS_PER_SEC / 1000000));
+-
+   nr_sdap_entity_t *sdap_entity;
+   sdap_entity = nr_sdap_get_entity(ue_id, pdusession_id);
+ 
+@@ -61,9 +59,6 @@ bool sdap_data_req(protocol_ctxt_t *ctxt_p,
+                                     destinationL2Id,
+                                     qfi,
+                                     rqi);
+-
+-  LOG_A(SDAP, "%s,end,%ld \n", __func__ , clock()/(CLOCKS_PER_SEC / 1000000));
+-
+   return ret;
+ }
+ 
+diff --git a/openair2/SDAP/nr_sdap/nr_sdap_entity.c b/openair2/SDAP/nr_sdap/nr_sdap_entity.c
+index fb63844896..e119b2407a 100644
+--- a/openair2/SDAP/nr_sdap/nr_sdap_entity.c
++++ b/openair2/SDAP/nr_sdap/nr_sdap_entity.c
+@@ -69,9 +69,6 @@ static bool nr_sdap_tx_entity(nr_sdap_entity_t *entity,
+                               const uint32_t *destinationL2Id,
+                               const uint8_t qfi,
+                               const bool rqi) {
+-
+-  LOG_A(SDAP, "%s,start,%ld \n", __func__ , clock()/(CLOCKS_PER_SEC / 1000000));
+-
+   /* The offset of the SDAP header, it might be 0 if has_sdap_tx is not true in the pdcp entity. */
+   int offset=0;
+   bool ret = false;
+@@ -109,7 +106,6 @@ static bool nr_sdap_tx_entity(nr_sdap_entity_t *entity,
+     if(!ret)
+       LOG_E(SDAP, "%s:%d:%s: PDCP refused PDU\n", __FILE__, __LINE__, __FUNCTION__);
+ 
+-    LOG_A(SDAP, "%s,end,%ld \n", __func__ , clock()/(CLOCKS_PER_SEC / 1000000));
+     return ret;
+   }
+ 
+diff --git a/targets/TEST/PACKET_TRACER/.lock-rel8 b/targets/TEST/PACKET_TRACER/.lock-rel8
+deleted file mode 100644
+index e69de29bb2..0000000000
+diff --git a/targets/TEST/PACKET_TRACER/EUTRA-RRC-Definitions.asn b/targets/TEST/PACKET_TRACER/EUTRA-RRC-Definitions.asn
+deleted file mode 120000
+index cc4dd0b676..0000000000
+--- a/targets/TEST/PACKET_TRACER/EUTRA-RRC-Definitions.asn
++++ /dev/null
+@@ -1 +0,0 @@
+-EUTRA-RRC-Definitions-86.asn
+\ No newline at end of file
