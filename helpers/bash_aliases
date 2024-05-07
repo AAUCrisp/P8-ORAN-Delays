@@ -21,7 +21,7 @@
 #  --  P8 Specific Variables & Setup
 p8_path="$HOME/P8-ORAN-Delays"
 p8_git_path="--git-dir=$p8_path/.git --work-tree=$p8_path"
-oai_path="$HOME/openairinterface"
+oai_path="$HOME/openairinterface5g"
 
 # declare -A ips=( 
 #     ["up0"]="192.168.1.105" 
@@ -146,7 +146,7 @@ p8() {
     elif [[ $1 = gnb ]]         # Run P8 Headend Program
     then
         echo "Setting up the gNB"
-        $oai_path/cmake_targets/ran_build/build/nr-softmodem –O /home/test/gnb.conf --sa –E –-rfsim
+        sudo $oai_path/cmake_targets/ran_build/build/nr-softmodem –O $p8_path/gnb.conf --sa –E –-rfsim
 
     # elif [[ $1 = up* ]]         # Connect to the UP0 via SSH
     # then
